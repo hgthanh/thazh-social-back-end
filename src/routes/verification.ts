@@ -1,15 +1,14 @@
 // src/routes/verification.ts
-import { Router, Response } from 'express';
-import { supabase } from '../config/supabase';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { Router as RouterVerif, Response as ResponseVerif } from 'express';
+import { supabase as supabaseVerif } from '../config/supabase';
+import { authenticate as authenticateVerif, AuthRequest as AuthRequestVerif } from '../middleware/auth';
 
-const router = Router();
+const routerVerif = RouterVerif();
 
 // Submit Verification Request
-router.post('/request', authenticate, async (req: AuthRequest, res: Response) => {
+routerVerif.post('/request', authenticateVerif, async (req: AuthRequestVerif, res: ResponseVerif): Promise<void> => {
   try {
-    // Check if user already has a pending or approved request
-    const { data: existingRequest } = await supabase
+    const { data: existingRequest } = await supabaseVerif
       .from('verification_requests')
       .select('*')
       .eq('user_id', req.user!.id)
@@ -18,13 +17,14 @@ router.post('/request', authenticate, async (req: AuthRequest, res: Response) =>
 
     if (existingRequest) {
       if (existingRequest.status === 'approved') {
-        return res.status(400).json({ error: 'Account already verified' });
+        res.status(400).json({ error: 'Account already verified' });
+        return;
       }
-      return res.status(400).json({ error: 'Verification request already pending' });
+      res.status(400).json({ error: 'Verification request already pending' });
+      return;
     }
 
-    // Create verification request
-    const { data: request, error } = await supabase
+    const { data: request, error } = await supabaseVerif
       .from('verification_requests')
       .insert({
         user_id: req.user!.id,
@@ -34,7 +34,8 @@ router.post('/request', authenticate, async (req: AuthRequest, res: Response) =>
       .single();
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.status(201).json({
@@ -48,9 +49,9 @@ router.post('/request', authenticate, async (req: AuthRequest, res: Response) =>
 });
 
 // Get User's Verification Request Status
-router.get('/status', authenticate, async (req: AuthRequest, res: Response) => {
+routerVerif.get('/status', authenticateVerif, async (req: AuthRequestVerif, res: ResponseVerif): Promise<void> => {
   try {
-    const { data: request, error } = await supabase
+    const { data: request, error } = await supabaseVerif
       .from('verification_requests')
       .select('*')
       .eq('user_id', req.user!.id)
@@ -59,7 +60,8 @@ router.get('/status', authenticate, async (req: AuthRequest, res: Response) => {
       .single();
 
     if (error || !request) {
-      return res.json({ status: 'none', message: 'No verification request found' });
+      res.json({ status: 'none', message: 'No verification request found' });
+      return;
     }
 
     res.json({ request });
@@ -69,4 +71,4 @@ router.get('/status', authenticate, async (req: AuthRequest, res: Response) => {
   }
 });
 
-export default router;
+export default routerVerif;

@@ -10,7 +10,7 @@ router.use(authenticate);
 router.use(requireAdmin);
 
 // Get Dashboard Statistics
-router.get('/stats', async (req: AuthRequest, res: Response) => {
+router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     // Total users
     const { count: totalUsers } = await supabaseAdmin
@@ -55,7 +55,7 @@ router.get('/stats', async (req: AuthRequest, res: Response) => {
 });
 
 // Get All Verification Requests
-router.get('/verification-requests', async (req: AuthRequest, res: Response) => {
+router.get('/verification-requests', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { status = 'pending' } = req.query;
 
@@ -80,7 +80,8 @@ router.get('/verification-requests', async (req: AuthRequest, res: Response) => 
     const { data: requests, error } = await query;
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ requests });
@@ -91,7 +92,7 @@ router.get('/verification-requests', async (req: AuthRequest, res: Response) => 
 });
 
 // Approve Verification Request
-router.post('/verification-requests/:requestId/approve', async (req: AuthRequest, res: Response) => {
+router.post('/verification-requests/:requestId/approve', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
 
@@ -103,11 +104,13 @@ router.post('/verification-requests/:requestId/approve', async (req: AuthRequest
       .single();
 
     if (!request) {
-      return res.status(404).json({ error: 'Request not found' });
+      res.status(404).json({ error: 'Request not found' });
+      return;
     }
 
     if (request.status !== 'pending') {
-      return res.status(400).json({ error: 'Request already processed' });
+      res.status(400).json({ error: 'Request already processed' });
+      return;
     }
 
     // Update request status
@@ -133,7 +136,7 @@ router.post('/verification-requests/:requestId/approve', async (req: AuthRequest
 });
 
 // Reject Verification Request
-router.post('/verification-requests/:requestId/reject', async (req: AuthRequest, res: Response) => {
+router.post('/verification-requests/:requestId/reject', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
 
@@ -144,11 +147,13 @@ router.post('/verification-requests/:requestId/reject', async (req: AuthRequest,
       .single();
 
     if (!request) {
-      return res.status(404).json({ error: 'Request not found' });
+      res.status(404).json({ error: 'Request not found' });
+      return;
     }
 
     if (request.status !== 'pending') {
-      return res.status(400).json({ error: 'Request already processed' });
+      res.status(400).json({ error: 'Request already processed' });
+      return;
     }
 
     await supabaseAdmin
@@ -167,7 +172,7 @@ router.post('/verification-requests/:requestId/reject', async (req: AuthRequest,
 });
 
 // Get All Posts (with pagination)
-router.get('/posts', async (req: AuthRequest, res: Response) => {
+router.get('/posts', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -188,7 +193,8 @@ router.get('/posts', async (req: AuthRequest, res: Response) => {
       .range(offset, offset + Number(limit) - 1);
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ posts });
@@ -199,7 +205,7 @@ router.get('/posts', async (req: AuthRequest, res: Response) => {
 });
 
 // Delete Post (Admin)
-router.delete('/posts/:postId', async (req: AuthRequest, res: Response) => {
+router.delete('/posts/:postId', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -211,7 +217,8 @@ router.delete('/posts/:postId', async (req: AuthRequest, res: Response) => {
       .single();
 
     if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+      res.status(404).json({ error: 'Post not found' });
+      return;
     }
 
     // Delete media from storage if exists
@@ -227,7 +234,8 @@ router.delete('/posts/:postId', async (req: AuthRequest, res: Response) => {
       .eq('id', postId);
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ message: 'Post deleted successfully' });
@@ -238,7 +246,7 @@ router.delete('/posts/:postId', async (req: AuthRequest, res: Response) => {
 });
 
 // Get All Users
-router.get('/users', async (req: AuthRequest, res: Response) => {
+router.get('/users', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 20, search } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -256,7 +264,8 @@ router.get('/users', async (req: AuthRequest, res: Response) => {
       .range(offset, offset + Number(limit) - 1);
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ users });
@@ -267,19 +276,16 @@ router.get('/users', async (req: AuthRequest, res: Response) => {
 });
 
 // Ban/Suspend User
-router.post('/users/:userId/ban', async (req: AuthRequest, res: Response) => {
+router.post('/users/:userId/ban', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
     const { reason } = req.body;
 
-    // Update user status (you may want to add a banned field to profiles table)
+    // Update user status
     await supabaseAdmin
       .from('profiles')
       .update({ is_banned: true, ban_reason: reason })
       .eq('id', userId);
-
-    // Optionally disable auth access
-    // await supabaseAdmin.auth.admin.updateUserById(userId, { banned: true });
 
     res.json({ message: 'User banned successfully' });
   } catch (error) {
@@ -289,7 +295,7 @@ router.post('/users/:userId/ban', async (req: AuthRequest, res: Response) => {
 });
 
 // Delete Comment (Admin)
-router.delete('/comments/:commentId', async (req: AuthRequest, res: Response) => {
+router.delete('/comments/:commentId', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { commentId } = req.params;
 
@@ -299,7 +305,8 @@ router.delete('/comments/:commentId', async (req: AuthRequest, res: Response) =>
       .eq('id', commentId);
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ message: 'Comment deleted successfully' });

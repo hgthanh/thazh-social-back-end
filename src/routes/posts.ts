@@ -9,7 +9,7 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Get News Feed (All posts, newest first)
-router.get('/feed', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/feed', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -30,12 +30,13 @@ router.get('/feed', authenticate, async (req: AuthRequest, res: Response) => {
       .range(offset, offset + Number(limit) - 1);
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     // Get like status for current user
     const postsWithLikes = await Promise.all(
-      posts.map(async (post) => {
+      (posts || []).map(async (post: any) => {
         const { data: userLike } = await supabase
           .from('likes')
           .select('*')
@@ -62,13 +63,14 @@ router.post(
   '/',
   authenticate,
   upload.single('media'),
-  async (req: AuthRequest, res: Response) => {
+  async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { content } = req.body;
       const file = req.file;
 
       if (!content && !file) {
-        return res.status(400).json({ error: 'Post must have content or media' });
+        res.status(400).json({ error: 'Post must have content or media' });
+        return;
       }
 
       let mediaUrl: string | null = null;
@@ -95,7 +97,8 @@ router.post(
           });
 
         if (uploadError) {
-          return res.status(400).json({ error: uploadError.message });
+          res.status(400).json({ error: uploadError.message });
+          return;
         }
 
         const { data: urlData } = supabase.storage
@@ -132,7 +135,8 @@ router.post(
         .single();
 
       if (postError) {
-        return res.status(400).json({ error: postError.message });
+        res.status(400).json({ error: postError.message });
+        return;
       }
 
       // Process hashtags
@@ -168,7 +172,7 @@ router.post(
 );
 
 // Get Single Post
-router.get('/:postId', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/:postId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -188,7 +192,8 @@ router.get('/:postId', authenticate, async (req: AuthRequest, res: Response) => 
       .single();
 
     if (error || !post) {
-      return res.status(404).json({ error: 'Post not found' });
+      res.status(404).json({ error: 'Post not found' });
+      return;
     }
 
     // Check if user liked this post
@@ -207,7 +212,7 @@ router.get('/:postId', authenticate, async (req: AuthRequest, res: Response) => 
 });
 
 // Like/Unlike Post
-router.post('/:postId/like', authenticate, async (req: AuthRequest, res: Response) => {
+router.post('/:postId/like', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -249,7 +254,7 @@ router.post('/:postId/like', authenticate, async (req: AuthRequest, res: Respons
 });
 
 // Get Post Comments
-router.get('/:postId/comments', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/:postId/comments', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -269,7 +274,8 @@ router.get('/:postId/comments', authenticate, async (req: AuthRequest, res: Resp
       .order('created_at', { ascending: false });
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ comments });
@@ -280,13 +286,14 @@ router.get('/:postId/comments', authenticate, async (req: AuthRequest, res: Resp
 });
 
 // Add Comment
-router.post('/:postId/comments', authenticate, async (req: AuthRequest, res: Response) => {
+router.post('/:postId/comments', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
     const { content } = req.body;
 
     if (!content) {
-      return res.status(400).json({ error: 'Comment content required' });
+      res.status(400).json({ error: 'Comment content required' });
+      return;
     }
 
     const { data: comment, error } = await supabase
@@ -309,7 +316,8 @@ router.post('/:postId/comments', authenticate, async (req: AuthRequest, res: Res
       .single();
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     // Increment comment count
@@ -323,7 +331,7 @@ router.post('/:postId/comments', authenticate, async (req: AuthRequest, res: Res
 });
 
 // Delete Post
-router.delete('/:postId', authenticate, async (req: AuthRequest, res: Response) => {
+router.delete('/:postId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -335,11 +343,13 @@ router.delete('/:postId', authenticate, async (req: AuthRequest, res: Response) 
       .single();
 
     if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+      res.status(404).json({ error: 'Post not found' });
+      return;
     }
 
     if (post.user_id !== req.user!.id) {
-      return res.status(403).json({ error: 'Not authorized' });
+      res.status(403).json({ error: 'Not authorized' });
+      return;
     }
 
     // Delete media from storage if exists
@@ -355,7 +365,8 @@ router.delete('/:postId', authenticate, async (req: AuthRequest, res: Response) 
       .eq('id', postId);
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ message: 'Post deleted successfully' });

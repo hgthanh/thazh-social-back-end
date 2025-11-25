@@ -6,12 +6,13 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 const router = Router();
 
 // Search Users, Posts, and Hashtags
-router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { q, type = 'all' } = req.query;
 
     if (!q || typeof q !== 'string') {
-      return res.status(400).json({ error: 'Search query required' });
+      res.status(400).json({ error: 'Search query required' });
+      return;
     }
 
     const searchTerm = q.toLowerCase();
@@ -71,7 +72,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 });
 
 // Get Posts by Hashtag
-router.get('/hashtag/:tag', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/hashtag/:tag', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { tag } = req.params;
     const cleanTag = tag.startsWith('#') ? tag.toLowerCase() : `#${tag.toLowerCase()}`;
@@ -84,7 +85,8 @@ router.get('/hashtag/:tag', authenticate, async (req: AuthRequest, res: Response
       .single();
 
     if (!hashtag) {
-      return res.status(404).json({ error: 'Hashtag not found' });
+      res.status(404).json({ error: 'Hashtag not found' });
+      return;
     }
 
     // Get posts with this hashtag
@@ -105,7 +107,7 @@ router.get('/hashtag/:tag', authenticate, async (req: AuthRequest, res: Response
       `)
       .eq('hashtag_id', hashtag.id);
 
-    const posts = postHashtags?.map(ph => ph.posts).filter(Boolean) || [];
+    const posts = postHashtags?.map((ph: any) => ph.posts).filter(Boolean) || [];
 
     res.json({ hashtag, posts });
   } catch (error) {
@@ -115,7 +117,7 @@ router.get('/hashtag/:tag', authenticate, async (req: AuthRequest, res: Response
 });
 
 // Get Trending Hashtags
-router.get('/trending', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/trending', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { data: hashtags, error } = await supabase
       .from('hashtags')
@@ -124,7 +126,8 @@ router.get('/trending', authenticate, async (req: AuthRequest, res: Response) =>
       .limit(10);
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     res.json({ hashtags });

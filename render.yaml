@@ -1,0 +1,45 @@
+services:
+  # Backend API Service
+  - type: web
+    name: thazh-social-back-end
+    env: node
+    region: singapore # Chọn region gần với user của bạn
+    plan: free # Hoặc starter, standard tùy nhu cầu
+    
+    # Build settings
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      
+      - key: PORT
+        value: 3000
+      
+      # APP_URL sẽ là URL của backend này (tự động từ Render)
+      - key: APP_URL
+        value: https://thazh-social-backend.onrender.com
+        # Hoặc để Render tự động set:
+        # sync: false
+        # generateValue: true
+      
+      # Supabase credentials (set from Render Dashboard)
+      - key: SUPABASE_URL
+        sync: false # Nhập thủ công từ dashboard
+      
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+    
+    # Tự động deploy khi push code
+    autoDeploy: true
+    
+    # Branch để deploy
+    branch: main
