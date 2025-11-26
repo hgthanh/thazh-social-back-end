@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác minh tài khoản - Thazh Social</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/home" class="logo">🚀 Thazh Social</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="icon">🏆</div>
+            <h2>Xác minh tài khoản</h2>
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+        const token = localStorage.getItem('token');
+
+        if (!token) window.location.href = '/login';
+
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_URL}/verification/status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                const content = document.getElementById('content');
+
+                if (data.status === 'none') {
+                    content.innerHTML = `
+                        <p>Xác minh tài khoản của bạn để nhận dấu tích xanh và tăng độ tin cậy.</p>
+                        <button class="btn" onclick="requestVerification()">Gửi yêu cầu xác minh</button>
+                    `;
+                } else if (data.request.status === 'pending') {
+                    content.innerHTML = `
+                        <div class="status-badge status-pending">⏳ Đang chờ xét duyệt</div>
+                        <p>Yêu cầu của bạn đang được xem xét bởi quản trị viên.</p>
+                    `;
+                } else if (data.request.status === 'approved') {
+                    content.innerHTML = `
+                        <div class="status-badge status-approved">✅ Đã xác minh</div>
+                        <p>Tài khoản của bạn đã được xác minh!</p>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div class="status-badge status-rejected">❌ Bị từ chối</div>
+                        <p>Yêu cầu của bạn đã bị từ chối. Bạn có thể gửi lại sau.</p>
+                        <button class="btn" onclick="requestVerification()">Gửi lại yêu cầu</button>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML = '<p>Lỗi khi tải thông tin</p>';
+            }
+        }
+
+        async function requestVerification() {
+            if (!confirm('Gửi yêu cầu xác minh tài khoản?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/verification/request`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Đã gửi yêu cầu xác minh!');
+                    checkStatus();
+                } else {
+                    alert(data.error || 'Lỗi khi gửi yêu cầu');
+                }
+            } catch (error) {
+                alert('Lỗi khi gửi yêu cầu');
+            }
+        }
+
+        checkStatus();
+    </script>
+</body>
+</html>

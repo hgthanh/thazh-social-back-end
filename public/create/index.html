@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo bài viết - Thazh Social</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .create-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .create-card h2 {
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9ff;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #667eea;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .file-input-btn:hover {
+            background: #eef0ff;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview {
+            margin-top: 15px;
+            border-radius: 10px;
+            max-width: 100%;
+            display: none;
+        }
+
+        .preview img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            display: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/home" class="logo">🚀 Thazh Social</a>
+            <button class="back-btn" onclick="window.location.href='/home'">← Quay lại</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="create-card">
+            <h2>Tạo bài viết mới</h2>
+
+            <div id="error" class="error"></div>
+            <div id="success" class="success"></div>
+
+            <form id="createPostForm">
+                <div class="form-group">
+                    <label>Nội dung</label>
+                    <textarea id="content" placeholder="Bạn đang nghĩ gì?&#10;&#10;Sử dụng #hashtag để phân loại bài viết..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Đính kèm (tùy chọn)</label>
+                    <div class="file-input-wrapper">
+                        <div class="file-input-btn">
+                            📷 Chọn hình ảnh hoặc âm thanh
+                        </div>
+                        <input type="file" id="media" accept="image/*,audio/*">
+                    </div>
+                    <div id="fileName" class="file-name"></div>
+                    <div id="preview" class="preview"></div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/home'">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Đăng bài</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // File preview
+        document.getElementById('media').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const fileName = document.getElementById('fileName');
+            const preview = document.getElementById('preview');
+
+            if (file) {
+                fileName.textContent = `📎 ${file.name}`;
+                fileName.style.display = 'block';
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.style.display = 'none';
+                }
+            }
+        });
+
+        // Submit form
+        document.getElementById('createPostForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const content = document.getElementById('content').value;
+            const mediaFile = document.getElementById('media').files[0];
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('error');
+            const successDiv = document.getElementById('success');
+
+            if (!content && !mediaFile) {
+                errorDiv.textContent = 'Vui lòng nhập nội dung hoặc chọn tệp đính kèm';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang đăng...';
+
+            try {
+                const formData = new FormData();
+                formData.append('content', content);
+                if (mediaFile) {
+                    formData.append('media', mediaFile);
+                }
+
+                const response = await fetch(`${API_URL}/posts`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Đăng bài thất bại');
+                }
+
+                successDiv.textContent = 'Đăng bài thành công! Đang chuyển hướng...';
+                successDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = '/home';
+                }, 1500);
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Đăng bài';
+            }
+        });
+    </script>
+</body>
+</html>

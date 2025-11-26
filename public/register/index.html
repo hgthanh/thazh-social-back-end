@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - Thazh Social</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+        }
+
+        .left-side {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .left-side h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .left-side p {
+            font-size: 18px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .right-side {
+            flex: 1;
+            padding: 60px 40px;
+        }
+
+        .form-header {
+            margin-bottom: 40px;
+        }
+
+        .form-header h2 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .left-side {
+                padding: 40px 30px;
+            }
+
+            .left-side h1 {
+                font-size: 36px;
+            }
+
+            .right-side {
+                padding: 40px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-side">
+            <h1>🚀 Thazh Social</h1>
+            <p>Tham gia cộng đồng của chúng tôi và bắt đầu kết nối với mọi người ngay hôm nay!</p>
+        </div>
+        <div class="right-side">
+            <div class="form-header">
+                <h2>Đăng ký</h2>
+                <p>Tạo tài khoản mới</p>
+            </div>
+
+            <div id="error" class="error"></div>
+            <div id="success" class="success"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Tên hiển thị</label>
+                    <input type="text" id="displayName" required placeholder="Nguyễn Văn A">
+                </div>
+
+                <div class="form-group">
+                    <label>Tên người dùng</label>
+                    <input type="text" id="username" required placeholder="nguyenvana" pattern="[a-zA-Z0-9_]+" title="Chỉ chữ cái, số và dấu gạch dưới">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required placeholder="example@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="password" required placeholder="••••••••" minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label>Xác nhận mật khẩu</label>
+                    <input type="password" id="confirmPassword" required placeholder="••••••••" minlength="6">
+                </div>
+
+                <button type="submit" class="btn" id="registerBtn">Đăng ký</button>
+            </form>
+
+            <div class="login-link">
+                Đã có tài khoản? <a href="/login">Đăng nhập</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+
+        // Check if already logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+            window.location.href = '/home';
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const displayName = document.getElementById('displayName').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const registerBtn = document.getElementById('registerBtn');
+            const errorDiv = document.getElementById('error');
+            const successDiv = document.getElementById('success');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Mật khẩu không khớp';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Đang đăng ký...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, username, displayName })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Đăng ký thất bại');
+                }
+
+                successDiv.textContent = 'Đăng ký thành công! Đang chuyển hướng...';
+                successDiv.style.display = 'block';
+
+                // Save token and redirect
+                localStorage.setItem('token', data.session.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                setTimeout(() => {
+                    window.location.href = '/home';
+                }, 1500);
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Đăng ký';
+            }
+        });
+    </script>
+</body>
+</html>
