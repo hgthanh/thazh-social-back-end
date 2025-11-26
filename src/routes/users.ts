@@ -9,7 +9,7 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Get User Profile
-router.get('/:username', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:username', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { username } = req.params;
 
@@ -69,7 +69,7 @@ router.put(
     { name: 'avatar', maxCount: 1 },
     { name: 'cover', maxCount: 1 },
   ]),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
       const { displayName, bio } = req.body;
       const files = req.files as any;
@@ -149,7 +149,7 @@ router.put(
 );
 
 // Follow User
-router.post('/:userId/follow', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/:userId/follow', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -193,7 +193,7 @@ router.post('/:userId/follow', authenticate, async (req: AuthRequest, res: Respo
 });
 
 // Unfollow User
-router.delete('/:userId/follow', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/:userId/follow', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -219,7 +219,7 @@ router.delete('/:userId/follow', authenticate, async (req: AuthRequest, res: Res
 });
 
 // Get Followers
-router.get('/:userId/followers', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:userId/followers', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -250,7 +250,7 @@ router.get('/:userId/followers', authenticate, async (req: AuthRequest, res: Res
 });
 
 // Get Following
-router.get('/:userId/following', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:userId/following', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 

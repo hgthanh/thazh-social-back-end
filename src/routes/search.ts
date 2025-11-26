@@ -6,7 +6,7 @@ import { authenticate } from '../middleware/auth';
 const router = Router();
 
 // Search Users, Posts, and Hashtags
-router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { q, type = 'all' } = req.query;
 
@@ -72,7 +72,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<v
 });
 
 // Get Posts by Hashtag
-router.get('/hashtag/:tag', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/hashtag/:tag', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { tag } = req.params;
     const cleanTag = tag.startsWith('#') ? tag.toLowerCase() : `#${tag.toLowerCase()}`;
@@ -117,7 +117,7 @@ router.get('/hashtag/:tag', authenticate, async (req: AuthRequest, res: Response
 });
 
 // Get Trending Hashtags
-router.get('/trending', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/trending', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { data: hashtags, error } = await supabase
       .from('hashtags')

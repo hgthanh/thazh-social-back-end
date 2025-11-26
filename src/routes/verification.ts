@@ -6,7 +6,7 @@ import { authenticate } from '../middleware/auth';
 const router = Router();
 
 // Submit Verification Request
-router.post('/request', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/request', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { data: existingRequest } = await supabase
       .from('verification_requests')
@@ -49,7 +49,7 @@ router.post('/request', authenticate, async (req: AuthRequest, res: Response): P
 });
 
 // Get User's Verification Request Status
-router.get('/status', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/status', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { data: request, error } = await supabase
       .from('verification_requests')
