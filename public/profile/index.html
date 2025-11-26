@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Thazh Social</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .cover {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+
+        .profile-content {
+            padding: 20px 30px 30px;
+            position: relative;
+        }
+
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 5px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            position: absolute;
+            top: -60px;
+            left: 30px;
+        }
+
+        .profile-actions {
+            text-align: right;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .profile-info h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .verified {
+            color: #1da1f2;
+            font-size: 24px;
+        }
+
+        .username {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .bio {
+            color: #333;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 30px 0 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .post-content {
+            color: #333;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .post-media {
+            width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 15px;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #c33;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/home" class="logo">🚀 Thazh Social</a>
+            <a href="/home" style="text-decoration: none; color: #666;">← Quay lại</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="profileContent">
+            <div class="loading">Đang tải profile...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+        const token = localStorage.getItem('token');
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Get username from URL
+        const username = window.location.pathname.replace('/@', '');
+
+        async function loadProfile() {
+            const container = document.getElementById('profileContent');
+
+            try {
+                const response = await fetch(`${API_URL}/users/${username}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.status === 404) {
+                    container.innerHTML = '<div class="error">Không tìm thấy người dùng này</div>';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to load profile');
+                }
+
+                const data = await response.json();
+                const profile = data.profile;
+                const posts = data.posts || [];
+
+                const isOwnProfile = profile.username === currentUser.username;
+
+                container.innerHTML = `
+                    <div class="profile-header">
+                        <div class="cover"></div>
+                        <div class="profile-content">
+                            <div class="avatar-large">
+                                ${profile.display_name.charAt(0).toUpperCase()}
+                            </div>
+                            
+                            <div class="profile-actions">
+                                ${isOwnProfile ? 
+                                    '<button class="btn btn-secondary" onclick="window.location.href=\'/settings\'">Chỉnh sửa</button>' :
+                                    `<button class="btn ${profile.is_following ? 'btn-secondary' : 'btn-primary'}" onclick="toggleFollow('${profile.id}', this)">
+                                        ${profile.is_following ? 'Đang theo dõi' : 'Theo dõi'}
+                                    </button>`
+                                }
+                            </div>
+
+                            <div class="profile-info">
+                                <h1>
+                                    ${profile.display_name}
+                                    ${profile.is_verified ? '<span class="verified">✓</span>' : ''}
+                                </h1>
+                                <div class="username">@${profile.username}</div>
+                                ${profile.bio ? `<div class="bio">${profile.bio}</div>` : ''}
+
+                                <div class="stats">
+                                    <div class="stat-item">
+                                        <div class="stat-value">${posts.length}</div>
+                                        <div class="stat-label">Bài viết</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${profile.follower_count || 0}</div>
+                                        <div class="stat-label">Người theo dõi</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${profile.following_count || 0}</div>
+                                        <div class="stat-label">Đang theo dõi</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${profile.total_likes_received || 0}</div>
+                                        <div class="stat-label">Lượt thích</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab active">Bài viết</button>
+                    </div>
+
+                    <div class="posts-grid">
+                        ${posts.length > 0 ? posts.map(post => `
+                            <div class="post-card">
+                                <div class="post-content">${post.content || ''}</div>
+                                ${post.media_url && post.media_type === 'image' ? 
+                                    `<img src="${post.media_url}" class="post-media" alt="Post image">` : ''
+                                }
+                                <div class="post-stats">
+                                    <span>❤️ ${post.like_count || 0}</span>
+                                    <span>💬 ${post.comment_count || 0}</span>
+                                </div>
+                            </div>
+                        `).join('') : '<div class="empty">Chưa có bài viết nào</div>'}
+                    </div>
+                `;
+
+                // Update page title
+                document.title = `${profile.display_name} (@${profile.username}) - Thazh Social`;
+
+            } catch (error) {
+                console.error('Load profile error:', error);
+                container.innerHTML = '<div class="error">Lỗi khi tải profile</div>';
+            }
+        }
+
+        async function toggleFollow(userId, button) {
+            try {
+                const isFollowing = button.textContent.trim() === 'Đang theo dõi';
+                
+                const response = await fetch(`${API_URL}/users/${userId}/follow`, {
+                    method: isFollowing ? 'DELETE' : 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadProfile(); // Reload to update stats
+                }
+            } catch (error) {
+                console.error('Follow error:', error);
+            }
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>

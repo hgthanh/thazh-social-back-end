@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thazh Social</title>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+        <p>Đang chuyển hướng...</p>
+    </div>
+    <script>
+        const token = localStorage.getItem('token');
+        if (token) {
+            window.location.href = '/home';
+        } else {
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

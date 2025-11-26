@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hashtag - Thazh Social</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hashtag-header {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .hashtag-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            margin: 0 auto 20px;
+        }
+
+        .hashtag-header h1 {
+            font-size: 36px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .hashtag-stats {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .post-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .post-info {
+            flex: 1;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .post-author:hover {
+            color: #667eea;
+        }
+
+        .verified {
+            color: #1da1f2;
+            margin-left: 5px;
+        }
+
+        .post-time {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .post-content {
+            margin: 15px 0;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .post-content .hashtag {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .post-media {
+            width: 100%;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .action-btn:hover {
+            color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #c33;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty h3 {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/home" class="logo">🚀 Thazh Social</a>
+            <a href="/search" style="text-decoration: none; color: #666;">← Quay lại tìm kiếm</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="hashtagContent">
+            <div class="loading">Đang tải hashtag...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Get hashtag from URL
+        const tag = window.location.pathname.replace('/hashtag/', '');
+
+        async function loadHashtag() {
+            const container = document.getElementById('hashtagContent');
+
+            try {
+                const response = await fetch(`${API_URL}/search/hashtag/${tag}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.status === 404) {
+                    container.innerHTML = '<div class="error">Không tìm thấy hashtag này</div>';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to load hashtag');
+                }
+
+                const data = await response.json();
+                const hashtag = data.hashtag;
+                const posts = data.posts || [];
+
+                container.innerHTML = `
+                    <div class="hashtag-header">
+                        <div class="hashtag-icon">#</div>
+                        <h1>${hashtag.tag}</h1>
+                        <div class="hashtag-stats">
+                            ${hashtag.post_count} bài viết
+                        </div>
+                    </div>
+
+                    <div id="postsContainer">
+                        ${posts.length > 0 ? posts.map(post => `
+                            <div class="post-card">
+                                <div class="post-header">
+                                    <div class="post-avatar" onclick="window.location.href='/@${post.profiles?.username}'">
+                                        ${post.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
+                                    </div>
+                                    <div class="post-info">
+                                        <div class="post-author" onclick="window.location.href='/@${post.profiles?.username}'">
+                                            ${post.profiles?.display_name || 'Unknown'}
+                                            ${post.profiles?.is_verified ? '<span class="verified">✓</span>' : ''}
+                                        </div>
+                                        <div class="post-time">@${post.profiles?.username || 'unknown'} · ${formatTime(post.created_at)}</div>
+                                    </div>
+                                </div>
+                                <div class="post-content">${highlightHashtags(post.content || '')}</div>
+                                ${post.media_url ? `
+                                    ${post.media_type === 'image' ? 
+                                        `<img src="${post.media_url}" class="post-media" alt="Post media">` :
+                                        `<audio src="${post.media_url}" controls class="post-media"></audio>`
+                                    }
+                                ` : ''}
+                                <div class="post-actions">
+                                    <button class="action-btn">
+                                        ❤️ ${post.like_count || 0}
+                                    </button>
+                                    <button class="action-btn">
+                                        💬 ${post.comment_count || 0}
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('') : `
+                            <div class="empty">
+                                <h3>Chưa có bài viết nào</h3>
+                                <p>Hãy là người đầu tiên sử dụng hashtag này!</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+
+                // Update page title
+                document.title = `${hashtag.tag} - Thazh Social`;
+
+            } catch (error) {
+                console.error('Load hashtag error:', error);
+                container.innerHTML = '<div class="error">Lỗi khi tải hashtag</div>';
+            }
+        }
+
+        function highlightHashtags(content) {
+            return content.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return 'Vừa xong';
+            if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+            if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`;
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        loadHashtag();
+    </script>
+</body>
+</html>
