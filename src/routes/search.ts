@@ -1,3 +1,4 @@
+
 // src/routes/search.ts
 import { Router, Response } from 'express';
 import { supabase } from '../config/supabase';

@@ -1,19 +1,19 @@
 // src/routes/users.ts
-import { Router as RouterUser, Response as ResponseUser } from 'express';
-import { supabase as supabaseUser } from '../config/supabase';
-import { authenticate as authenticateUser, AuthRequest as AuthRequestUser } from '../middleware/auth';
+import { Router, Response } from 'express';
+import { supabase } from '../config/supabase';
+import { authenticate, AuthRequest } from '../middleware/auth';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
-const routerUser = RouterUser();
-const uploadUser = multer({ storage: multer.memoryStorage() });
+const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Get User Profile
-routerUser.get('/:username', authenticateUser, async (req: AuthRequestUser, res: ResponseUser): Promise<void> => {
+router.get('/:username', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { username } = req.params;
 
-    const { data: profile, error } = await supabaseUser
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('username', username)
@@ -25,14 +25,14 @@ routerUser.get('/:username', authenticateUser, async (req: AuthRequestUser, res:
     }
 
     // Get user's posts
-    const { data: posts } = await supabaseUser
+    const { data: posts } = await supabase
       .from('posts')
       .select('*')
       .eq('user_id', profile.id)
       .order('created_at', { ascending: false });
 
     // Check if current user follows this profile
-    const { data: followData } = await supabaseUser
+    const { data: followData } = await supabase
       .from('follows')
       .select('*')
       .eq('follower_id', req.user!.id)
@@ -40,7 +40,7 @@ routerUser.get('/:username', authenticateUser, async (req: AuthRequestUser, res:
       .single();
 
     // Calculate total likes received
-    const { data: likesData } = await supabaseUser
+    const { data: likesData } = await supabase
       .from('posts')
       .select('like_count')
       .eq('user_id', profile.id);
@@ -62,14 +62,14 @@ routerUser.get('/:username', authenticateUser, async (req: AuthRequestUser, res:
 });
 
 // Update Profile
-routerUser.put(
+router.put(
   '/profile',
-  authenticateUser,
-  uploadUser.fields([
+  authenticate,
+  upload.fields([
     { name: 'avatar', maxCount: 1 },
     { name: 'cover', maxCount: 1 },
   ]),
-  async (req: AuthRequestUser, res: ResponseUser): Promise<void> => {
+  async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { displayName, bio } = req.body;
       const files = req.files as any;
@@ -86,7 +86,7 @@ routerUser.put(
         const fileName = `avatar-${uuidv4()}.${fileExt}`;
         const filePath = `avatars/${req.user!.id}/${fileName}`;
 
-        const { error: uploadError } = await supabaseUser.storage
+        const { error: uploadError } = await supabase.storage
           .from('media')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
@@ -94,7 +94,7 @@ routerUser.put(
           });
 
         if (!uploadError) {
-          const { data: urlData } = supabaseUser.storage
+          const { data: urlData } = supabase.storage
             .from('media')
             .getPublicUrl(filePath);
           updates.avatar_url = urlData.publicUrl;
@@ -108,7 +108,7 @@ routerUser.put(
         const fileName = `cover-${uuidv4()}.${fileExt}`;
         const filePath = `covers/${req.user!.id}/${fileName}`;
 
-        const { error: uploadError } = await supabaseUser.storage
+        const { error: uploadError } = await supabase.storage
           .from('media')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
@@ -116,7 +116,7 @@ routerUser.put(
           });
 
         if (!uploadError) {
-          const { data: urlData } = supabaseUser.storage
+          const { data: urlData } = supabase.storage
             .from('media')
             .getPublicUrl(filePath);
           updates.cover_url = urlData.publicUrl;
@@ -128,7 +128,7 @@ routerUser.put(
         return;
       }
 
-      const { data: profile, error } = await supabaseUser
+      const { data: profile, error } = await supabase
         .from('profiles')
         .update(updates)
         .eq('id', req.user!.id)
@@ -149,7 +149,7 @@ routerUser.put(
 );
 
 // Follow User
-routerUser.post('/:userId/follow', authenticateUser, async (req: AuthRequestUser, res: ResponseUser): Promise<void> => {
+router.post('/:userId/follow', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -158,7 +158,7 @@ routerUser.post('/:userId/follow', authenticateUser, async (req: AuthRequestUser
       return;
     }
 
-    const { data: existingFollow } = await supabaseUser
+    const { data: existingFollow } = await supabase
       .from('follows')
       .select('*')
       .eq('follower_id', req.user!.id)
@@ -170,7 +170,7 @@ routerUser.post('/:userId/follow', authenticateUser, async (req: AuthRequestUser
       return;
     }
 
-    const { error } = await supabaseUser
+    const { error } = await supabase
       .from('follows')
       .insert({
         follower_id: req.user!.id,
@@ -182,8 +182,8 @@ routerUser.post('/:userId/follow', authenticateUser, async (req: AuthRequestUser
       return;
     }
 
-    await supabaseUser.rpc('increment_following_count', { user_id: req.user!.id });
-    await supabaseUser.rpc('increment_follower_count', { user_id: userId });
+    await supabase.rpc('increment_following_count', { user_id: req.user!.id });
+    await supabase.rpc('increment_follower_count', { user_id: userId });
 
     res.json({ message: 'User followed successfully' });
   } catch (error) {
@@ -193,11 +193,11 @@ routerUser.post('/:userId/follow', authenticateUser, async (req: AuthRequestUser
 });
 
 // Unfollow User
-routerUser.delete('/:userId/follow', authenticateUser, async (req: AuthRequestUser, res: ResponseUser): Promise<void> => {
+router.delete('/:userId/follow', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
-    const { error } = await supabaseUser
+    const { error } = await supabase
       .from('follows')
       .delete()
       .eq('follower_id', req.user!.id)
@@ -208,8 +208,8 @@ routerUser.delete('/:userId/follow', authenticateUser, async (req: AuthRequestUs
       return;
     }
 
-    await supabaseUser.rpc('decrement_following_count', { user_id: req.user!.id });
-    await supabaseUser.rpc('decrement_follower_count', { user_id: userId });
+    await supabase.rpc('decrement_following_count', { user_id: req.user!.id });
+    await supabase.rpc('decrement_follower_count', { user_id: userId });
 
     res.json({ message: 'User unfollowed successfully' });
   } catch (error) {
@@ -219,11 +219,11 @@ routerUser.delete('/:userId/follow', authenticateUser, async (req: AuthRequestUs
 });
 
 // Get Followers
-routerUser.get('/:userId/followers', authenticateUser, async (req: AuthRequestUser, res: ResponseUser): Promise<void> => {
+router.get('/:userId/followers', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
-    const { data: followers, error } = await supabaseUser
+    const { data: followers, error } = await supabase
       .from('follows')
       .select(`
         follower_id,
@@ -250,11 +250,11 @@ routerUser.get('/:userId/followers', authenticateUser, async (req: AuthRequestUs
 });
 
 // Get Following
-routerUser.get('/:userId/following', authenticateUser, async (req: AuthRequestUser, res: ResponseUser): Promise<void> => {
+router.get('/:userId/following', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
-    const { data: following, error } = await supabaseUser
+    const { data: following, error } = await supabase
       .from('follows')
       .select(`
         following_id,
@@ -280,4 +280,4 @@ routerUser.get('/:userId/following', authenticateUser, async (req: AuthRequestUs
   }
 });
 
-export default routerUser;
+export default router;

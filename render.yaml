@@ -23,7 +23,7 @@ services:
       
       # APP_URL sẽ là URL của backend này (tự động từ Render)
       - key: APP_URL
-        value: https://thazh-social-backend.onrender.com
+        value: https://thazh-social-back-end.onrender.com
         # Hoặc để Render tự động set:
         # sync: false
         # generateValue: true

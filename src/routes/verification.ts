@@ -1,14 +1,14 @@
 // src/routes/verification.ts
-import { Router as RouterVerif, Response as ResponseVerif } from 'express';
-import { supabase as supabaseVerif } from '../config/supabase';
-import { authenticate as authenticateVerif, AuthRequest as AuthRequestVerif } from '../middleware/auth';
+import { Router, Response } from 'express';
+import { supabase } from '../config/supabase';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
-const routerVerif = RouterVerif();
+const router = Router();
 
 // Submit Verification Request
-routerVerif.post('/request', authenticateVerif, async (req: AuthRequestVerif, res: ResponseVerif): Promise<void> => {
+router.post('/request', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { data: existingRequest } = await supabaseVerif
+    const { data: existingRequest } = await supabase
       .from('verification_requests')
       .select('*')
       .eq('user_id', req.user!.id)
@@ -24,7 +24,7 @@ routerVerif.post('/request', authenticateVerif, async (req: AuthRequestVerif, re
       return;
     }
 
-    const { data: request, error } = await supabaseVerif
+    const { data: request, error } = await supabase
       .from('verification_requests')
       .insert({
         user_id: req.user!.id,
@@ -49,9 +49,9 @@ routerVerif.post('/request', authenticateVerif, async (req: AuthRequestVerif, re
 });
 
 // Get User's Verification Request Status
-routerVerif.get('/status', authenticateVerif, async (req: AuthRequestVerif, res: ResponseVerif): Promise<void> => {
+router.get('/status', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { data: request, error } = await supabaseVerif
+    const { data: request, error } = await supabase
       .from('verification_requests')
       .select('*')
       .eq('user_id', req.user!.id)
@@ -71,4 +71,4 @@ routerVerif.get('/status', authenticateVerif, async (req: AuthRequestVerif, res:
   }
 });
 
-export default routerVerif;
+export default router;

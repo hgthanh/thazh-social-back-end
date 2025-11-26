@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase';
 
+// Extend Request with user property
 export interface AuthRequest extends Request {
   user?: {
     id: string;
