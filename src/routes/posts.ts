@@ -1,7 +1,7 @@
 // src/routes/posts.ts
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { supabase } from '../config/supabase';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,7 +9,7 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Get News Feed (All posts, newest first)
-router.get('/feed', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/feed', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -63,7 +63,7 @@ router.post(
   '/',
   authenticate,
   upload.single('media'),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
       const { content } = req.body;
       const file = req.file;
@@ -172,7 +172,7 @@ router.post(
 );
 
 // Get Single Post
-router.get('/:postId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:postId', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -212,7 +212,7 @@ router.get('/:postId', authenticate, async (req: AuthRequest, res: Response): Pr
 });
 
 // Like/Unlike Post
-router.post('/:postId/like', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/:postId/like', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -254,7 +254,7 @@ router.post('/:postId/like', authenticate, async (req: AuthRequest, res: Respons
 });
 
 // Get Post Comments
-router.get('/:postId/comments', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:postId/comments', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -286,7 +286,7 @@ router.get('/:postId/comments', authenticate, async (req: AuthRequest, res: Resp
 });
 
 // Add Comment
-router.post('/:postId/comments', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/:postId/comments', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
     const { content } = req.body;
@@ -331,7 +331,7 @@ router.post('/:postId/comments', authenticate, async (req: AuthRequest, res: Res
 });
 
 // Delete Post
-router.delete('/:postId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/:postId', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
