@@ -1,7 +1,7 @@
 // src/routes/users.ts
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { supabase } from '../config/supabase';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 

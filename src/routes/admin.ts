@@ -1,7 +1,7 @@
 // src/routes/admin.ts
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase';
-import { authenticate, requireAdmin, AuthRequest } from '../middleware/auth';
+import { authenticate, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
@@ -10,7 +10,7 @@ router.use(authenticate);
 router.use(requireAdmin);
 
 // Get Dashboard Statistics
-router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/stats', async (req: Request, res: Response): Promise<void> => {
   try {
     // Total users
     const { count: totalUsers } = await supabaseAdmin
@@ -55,7 +55,7 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
 });
 
 // Get All Verification Requests
-router.get('/verification-requests', async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/verification-requests', async (req: Request, res: Response): Promise<void> => {
   try {
     const { status = 'pending' } = req.query;
 
@@ -92,7 +92,7 @@ router.get('/verification-requests', async (req: AuthRequest, res: Response): Pr
 });
 
 // Approve Verification Request
-router.post('/verification-requests/:requestId/approve', async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/verification-requests/:requestId/approve', async (req: Request, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
 
@@ -136,7 +136,7 @@ router.post('/verification-requests/:requestId/approve', async (req: AuthRequest
 });
 
 // Reject Verification Request
-router.post('/verification-requests/:requestId/reject', async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/verification-requests/:requestId/reject', async (req: Request, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
 
@@ -172,7 +172,7 @@ router.post('/verification-requests/:requestId/reject', async (req: AuthRequest,
 });
 
 // Get All Posts (with pagination)
-router.get('/posts', async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/posts', async (req: Request, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -205,7 +205,7 @@ router.get('/posts', async (req: AuthRequest, res: Response): Promise<void> => {
 });
 
 // Delete Post (Admin)
-router.delete('/posts/:postId', async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/posts/:postId', async (req: Request, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
 
@@ -246,7 +246,7 @@ router.delete('/posts/:postId', async (req: AuthRequest, res: Response): Promise
 });
 
 // Get All Users
-router.get('/users', async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/users', async (req: Request, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 20, search } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -276,7 +276,7 @@ router.get('/users', async (req: AuthRequest, res: Response): Promise<void> => {
 });
 
 // Ban/Suspend User
-router.post('/users/:userId/ban', async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/users/:userId/ban', async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
     const { reason } = req.body;
@@ -295,7 +295,7 @@ router.post('/users/:userId/ban', async (req: AuthRequest, res: Response): Promi
 });
 
 // Delete Comment (Admin)
-router.delete('/comments/:commentId', async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/comments/:commentId', async (req: Request, res: Response): Promise<void> => {
   try {
     const { commentId } = req.params;
 
