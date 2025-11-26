@@ -223,18 +223,10 @@ router.get('/:userId/followers', authenticate, async (req: Request, res: Respons
   try {
     const { userId } = req.params;
 
-    const { data: followers, error } = await supabase
+    // Get followers with their profile info
+    const { data: followsData, error } = await supabase
       .from('follows')
-      .select(`
-        follower_id,
-        profiles!follows_follower_id_fkey (
-          id,
-          username,
-          display_name,
-          avatar_url,
-          is_verified
-        )
-      `)
+      .select('follower_id')
       .eq('following_id', userId);
 
     if (error) {
@@ -242,7 +234,19 @@ router.get('/:userId/followers', authenticate, async (req: Request, res: Respons
       return;
     }
 
-    res.json({ followers: followers.map((f: any) => f.profiles) });
+    if (!followsData || followsData.length === 0) {
+      res.json({ followers: [] });
+      return;
+    }
+
+    // Get profile details for all followers
+    const followerIds = followsData.map(f => f.follower_id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_url, is_verified')
+      .in('id', followerIds);
+
+    res.json({ followers: profiles || [] });
   } catch (error) {
     console.error('Get followers error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -254,18 +258,10 @@ router.get('/:userId/following', authenticate, async (req: Request, res: Respons
   try {
     const { userId } = req.params;
 
-    const { data: following, error } = await supabase
+    // Get following with their profile info
+    const { data: followsData, error } = await supabase
       .from('follows')
-      .select(`
-        following_id,
-        profiles!follows_following_id_fkey (
-          id,
-          username,
-          display_name,
-          avatar_url,
-          is_verified
-        )
-      `)
+      .select('following_id')
       .eq('follower_id', userId);
 
     if (error) {
@@ -273,7 +269,19 @@ router.get('/:userId/following', authenticate, async (req: Request, res: Respons
       return;
     }
 
-    res.json({ following: following.map((f: any) => f.profiles) });
+    if (!followsData || followsData.length === 0) {
+      res.json({ following: [] });
+      return;
+    }
+
+    // Get profile details for all following
+    const followingIds = followsData.map(f => f.following_id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_url, is_verified')
+      .in('id', followingIds);
+
+    res.json({ following: profiles || [] });
   } catch (error) {
     console.error('Get following error:', error);
     res.status(500).json({ error: 'Internal server error' });
