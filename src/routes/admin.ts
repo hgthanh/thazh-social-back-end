@@ -63,7 +63,7 @@ router.get('/verification-requests', async (req: Request, res: Response): Promis
       .from('verification_requests')
       .select(`
         *,
-        profiles (
+        profiles!verification_requests_user_id_fkey (
           id,
           username,
           display_name,
@@ -181,7 +181,7 @@ router.get('/posts', async (req: Request, res: Response): Promise<void> => {
       .from('posts')
       .select(`
         *,
-        profiles (
+        profiles!posts_user_id_fkey (
           id,
           username,
           display_name,

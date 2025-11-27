@@ -18,7 +18,7 @@ router.get('/feed', authenticate, async (req: Request, res: Response): Promise<v
       .from('posts')
       .select(`
         *,
-        profiles (
+        profiles!posts_user_id_fkey (
           id,
           username,
           display_name,
@@ -124,7 +124,7 @@ router.post(
         })
         .select(`
           *,
-          profiles (
+          profiles!posts_user_id_fkey (
             id,
             username,
             display_name,
@@ -180,7 +180,7 @@ router.get('/:postId', authenticate, async (req: Request, res: Response): Promis
       .from('posts')
       .select(`
         *,
-        profiles (
+        profiles!posts_user_id_fkey (
           id,
           username,
           display_name,
@@ -262,7 +262,7 @@ router.get('/:postId/comments', authenticate, async (req: Request, res: Response
       .from('comments')
       .select(`
         *,
-        profiles (
+        profiles!comments_user_id_fkey (
           id,
           username,
           display_name,
@@ -305,7 +305,7 @@ router.post('/:postId/comments', authenticate, async (req: Request, res: Respons
       })
       .select(`
         *,
-        profiles (
+        profiles!comments_user_id_fkey (
           id,
           username,
           display_name,
